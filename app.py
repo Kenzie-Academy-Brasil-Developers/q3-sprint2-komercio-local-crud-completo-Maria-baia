@@ -1,4 +1,7 @@
-# Seu código aqui
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
 produtos = [
     {"id": 1, "name": "sabonete", "price": 5.99},
     {"id": 2, "name": "perfume", "price": 39.90},
@@ -31,3 +34,37 @@ produtos = [
     {"id": 29, "name": "coberta", "price": 55.99},
     {"id": 30, "name": "sofa", "price": 600.15}
 ]
+
+@app.get("/products")
+def list_products():
+    return jsonify(produtos), 200
+
+@app.get("/products/<int:product_id>")
+def get(product_id: int):
+    for i in produtos:
+        if i.get("id") == product_id:
+            return i
+
+@app.post("/products")
+def create():
+    data = request.get_json()
+    name = data.get("name")
+    price = data.get("price")
+    produtos.append(data)
+    return {"id": len(produtos), "name": name, "price": price}, 201
+
+@app.route("/products/<int:product_id>", methods=["PATCH", "PUT"])
+def update(product_id: int):
+    if request.method == "PATCH" or request.method == "PUT":
+        for i in produtos:
+            if i.get("id") == product_id:
+                data = request.get_json()
+                i["name"] = data.get("name")
+                return "", 204
+
+@app.delete("/products/<int:product_id>")
+def delete(product_id: int):
+    for i in produtos:
+            if i.get("id") == product_id:
+                produtos.pop(produtos.index(i))
+                return "", 204
